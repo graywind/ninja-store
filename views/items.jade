@@ -3,13 +3,13 @@ extends layout
 block content
   #wrapper
     #logo
-      img(src='/images/logo.png')
+      img(src='/images/logo.jpg')
     #display
       include userbar
         
       -for (var id in items)
         - var item = items[id]
         div
-          a(href='/item/#{id}') #{item.name} - $#{item.price}
+          a(href='/item/#{item._id}') #{item._source.name} - $#{item._source.price}
       
     include footer
