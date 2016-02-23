@@ -1,16 +1,29 @@
 // our 'database'
-var items = {
-    SKN:{name:'Shuriken', price:100},
-    ASK:{name:'Ashiko', price:690},
-    CGI:{name:'Chigiriki', price:250},
-    NGT:{name:'Naginata', price:900},
-    KTN:{name:'Katana', price:1000}
-};
+var elasticsearch = require('elasticsearch'); 
 
-// handler for homepage
-exports.home = function(req, res) {
+var client = new elasticsearch.Client({
+  host: 'localhost:9200',
+  log: 'trace'
+});
+
+/*
+function searchit(){
+client.search({
+  q: '*',
+  index: 'ninjastore'
+}).then(function (body) {
+	return body.hits.hits;
+}, function (error) {
+  console.trace(error.message);
+});
+};
+*/
+
+exports.home = function(req, res){
     // if user is not logged in, ask them to login
-    if (typeof req.session.username == 'undefined') res.render('home', { title: 'Ninja Store'});
+    if (typeof req.session.username == 'undefined') {
+	res.render('home', { title: 'Ninja Store'});
+	}
     // if user is logged in already, take them straight to the items list
     else res.redirect('/items');
 };
@@ -29,7 +42,21 @@ exports.home_post_handler = function(req, res) {
 exports.items = function(req, res) {
     // don't let nameless people view the items, redirect them back to the homepage
     if (typeof req.session.username == 'undefined') res.redirect('/');
-    else res.render('items', { title: 'Ninja Store - Items', username: req.session.username, items:items });
+    //else res.render('items', { title: 'Ninja Store - Items', username: req.session.username, items:items });
+    else {
+	var items; 
+	client.search({
+	  q: '*',
+	  index: 'ninjastore'
+	}).then(function (body) {
+		items = body.hits.hits;
+	}, function (error) {
+	  console.trace(error.message);
+	}).then(function() {
+		res.render('items', { title: 'Ninja Store - Items', username: req.session.username, items:items })
+	});
+    };
+
 };
 
 // handler for displaying individual items
@@ -37,9 +64,26 @@ exports.item = function(req, res) {
     // don't let nameless people view the items, redirect them back to the homepage
     if (typeof req.session.username == 'undefined') res.redirect('/');
     else {
-        var name = items[req.params.id].name;
-        var price = items[req.params.id].price;
-        res.render('item', { title: 'Ninja Store - ' + name, username: req.session.username, name:name, price:price });
+	var item;
+	client.get({
+	  id: req.params.id,
+	  index: 'ninjastore',
+	  type: 'ninjatype'
+	}).then(function (body) {
+		item = body;
+		console.log(item);
+		console.log(item);
+		console.log(item._source);
+		console.log(item._source);
+		console.log(item._source.name);
+		console.log(item._source.price);
+	}, function (error) {
+	  console.trace(error.message);
+	}).then(function() {
+		console.log("I ran!");
+	        res.render('item', { title: 'Ninja Store - ' + 'name', username: req.session.username, name: item._source.name, price:item._source.price });
+		console.log("Me too!");
+	});
     }
 };
 
