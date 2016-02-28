@@ -9,7 +9,18 @@ exports.removeItem = function(req, res){
     if (typeof req.session.username == 'undefined') res.redirect('/');
     else {
 	console.log(req.body);
-	res.redirect('/items')
+	client.delete({
+		index: 'ninjastore',
+		type: 'ninjatype',
+		id: req.body._method
+	}).then(function() {
+		//res.render('items', { title: 'Ninja Store - Items', username: req.session.username, items:items })
+		//TODO: AJAX call instead of lazy redirect
+		res.redirect('/items')
+	});
+
+	//TODO: AJAX call instead of lazy redirect
+	//res.redirect('/items')
 	//res.end();
     }
 };
