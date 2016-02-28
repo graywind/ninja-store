@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 
 var store = require('./routes/store');
+var del = require('./routes/delete');
 
 var app = express();
 
@@ -27,6 +28,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', store.home);
 
 app.post('/', store.home_post_handler);
+
+app.post('/item/remove', del.removeItem);
 
 // display the list of item
 app.get('/items', store.items);

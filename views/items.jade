@@ -6,10 +6,14 @@ block content
       img(src='/images/logo.png')
     #display
       include userbar
-        
       -for (var id in items)
         - var item = items[id]
         div
           a(href='/item/#{item._id}') #{item._source.name} - $#{item._source.price}
-      
+            form(method='post', action='/item/remove', style='display: inline;')
+              input(type='hidden',name='_method', value='#{item._id}')
+              input(type="submit", value='Delete')
+
+
+
     include footer
